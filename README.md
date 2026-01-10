@@ -5,6 +5,7 @@ A small WCS-aware FITS image viewer / helper toolkit.
 ## Install (pip)
 
 ```bash
+cd ShowMap-main
 pip install -e .
 Check:
 pip show fits-show-map
