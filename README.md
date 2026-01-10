@@ -27,5 +27,10 @@ fits-show-map your.fits
 from fits_show_map import ShowMap
 inf = '/Users/wst/galaxies/NGC2442/NGC2442_EMU_SB59742_I.fits'
 header, data = ShowMap.load_fits_image(inf)
-ShowMap.show_fits(header=header,data=data,colobar=True,fontsize=22,beam=True,cmap='jet',cb_dedi='%0.4f')
+fig, ax = ShowMap.show_fits(header=header,data=data,colobar=True,fontsize=22,beam=True,cmap='jet',cb_dedi='%0.4f')
+
+### For return the "ax", you can link to matplotlib, for example follow above:
+ax.set_title('NGC2442')
+ax.set_ylabel('DEC (J2000)',labelpad=1)
+ax.set_xlabel('RA (J2000)',labelpad=1)
 ```
