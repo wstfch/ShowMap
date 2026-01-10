@@ -6,8 +6,13 @@ A small WCS-aware FITS image viewer / helper toolkit.
 
 ```bash
 pip install -e .
+Check:
+pip show fits-show-map
 ```
-
+## Uninstall
+```
+pip uninstall fits-show-map
+```
 ## Usage
 
 ```bash
