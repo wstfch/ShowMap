@@ -27,6 +27,4 @@ from fits_show_map import ShowMap
 inf = '/Users/wst/galaxies/NGC2442/NGC2442_EMU_SB59742_I.fits'
 header, data = ShowMap.load_fits_image(inf)
 ShowMap.show_fits(header=header,data=data,colobar=True,fontsize=22,beam=True,cmap='jet',cb_dedi='%0.4f')
-<img width="981" height="704" alt="image" src="https://github.com/user-attachments/assets/17361981-e9c0-4421-b7cc-433dd5332c57" />
-
 ```
