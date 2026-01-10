@@ -33,4 +33,6 @@ fig, ax = ShowMap.show_fits(header=header,data=data,colobar=True,fontsize=22,bea
 ax.set_title('NGC2442')
 ax.set_ylabel('DEC (J2000)',labelpad=1)
 ax.set_xlabel('RA (J2000)',labelpad=1)
+
+However, all the functions of image detail adjustment can be fully implemented in "show_fits" without the need for additional links.
 ```
