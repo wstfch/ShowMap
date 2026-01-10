@@ -1,9 +1,8 @@
 
 #---------------------------------------------------------------------------------------------------#
 # To show the fits image                                                                            #
-# (use:python3 fits-show-map.py image.q.SB27379.beam14.taylor.0.alt.restored.fits --savefig True ) #
 # Creat data : 2023.07.29                                                                           #
-# Author: Wang Shengtao                                                                             #
+# Author: Shengtao Wang                                                                             #
 #---------------------------------------------------------------------------------------------------#
 
 #fits show map
@@ -171,8 +170,9 @@ class ShowMap:
     """
     Date:2023.7.31
     Author: Shengtao Wang 
-    This script is used to show one or more fits images and has some available function,
-    (including map rotate, filled the Nan, regrid, loading fits to standard 2D images, etc.)
+    This script is used to show one or more fits images and some convenient functions,
+    (including map rotate, filling the Nan, cut large image to smaller, regrid, loading fits to standard 2D images, etc.)
+    You can also use it in combination with matplotlib for more convenience
     """
     # def __init__(self, fits=False, header=False, data=False, lim_image=False,fontsize=20, colobar=False, beam=False, cont=False):
     #     self.fits = fits
@@ -190,7 +190,6 @@ class ShowMap:
     def load_fits_image(filename):
         # Read the header and image data from the file
         with pf.open(filename) as hdul:
-    # 选择一个 HDU (例如，第一个 HDU，索引为 0)
             header = hdul[0].header
             data = hdul[0].data
         #header=pf.getheader(filename)
@@ -506,7 +505,7 @@ class ShowMap:
             ax.set_xlabel(x_label_list[i], labelpad=xpad_list[i])
             ax.set_ylabel(y_label_list[i], labelpad=ypad_list[i])
             if y_label_hide_list[i]:
-                ax.coords[1].set_ticklabel_visible(False)  # 隐藏y轴label
+                ax.coords[1].set_ticklabel_visible(False)  # Hide the y-axis label
             if title_list[i] is not None:
                 ax.set_title(title_list[i], fontsize=fontsize, pad=title_pad_list[i])
         # Adjust Layout
@@ -551,12 +550,11 @@ class ShowMap:
                 cbar.ax.set_xticklabels([])
 
         #formatter = ticker.FormatStrFormatter(cb_dedi)
-        #cbar.ax.xaxis.set_major_formatter(formatter)  # 注意这里改为 xaxis
+        #cbar.ax.xaxis.set_major_formatter(formatter)  # Note that it is changed to xaxis here
 
-        cbar.ax.tick_params(labelsize=cb_font)  # 设置刻度标签字体大小
+        cbar.ax.tick_params(labelsize=cb_font)  # Set the font size of the scale label
         if cb_lab is not None:
-            cbar.set_label(cb_lab, fontsize=cb_font, labelpad=15)  # 设置颜色条标签
-
+            cbar.set_label(cb_lab, fontsize=cb_font, labelpad=15)  # Set the color bar label
 
     @staticmethod
     def show_colobar1(pos=[0.98, 0.206, 0.03, 0.67],ticks=None,cb_lab=None,cb_pad=20):
@@ -633,7 +631,6 @@ class ShowMap:
                   linewidth=2, mutation_scale=15, rotation_angle=0, text_yposition=None, linestyle='solid'):
         """
         Draw a scalebar with rotation support.
-
         Parameters:
         scalebar_length : float
             The length of the scalebar in pixels.
@@ -730,28 +727,26 @@ class ShowMap:
     @staticmethod
     def show_colobar_liner(fig, ax, alpha=100, ticks_n=7,cb_loct='right', cb_size=0.08, color_pad=0.01, cb_pad=15, cb_lab=None, cmap=None,span=(0.1, 0.9), fmt="{:.2f}", cb_font=20, cbmin=0.0, cbmax=1.0):
         """
-        在 log 显示下：colorbar 刻度位置在显示空间等间距，但标签显示线性值。
-        - cbmin/cbmax: 线性空间的 vmin/vmax（与 carta_log_stretch 使用一致）
-        - span: 避免刻度贴边（默认 0.1~0.9）
-        - fmt: 线性标签格式
+        Under the log display: The colorbar scale positions are at equal intervals in the display space, but the labels show linear values.
+        - cbmin/cbmax: linear space vmin/vmax（similar to carta_log_stretch）
+        - span: Avoid the scale sticking to the edge (default: 0.1 to 0.9)
+        - fmt: Linear label format
         """
         if not ax.images:
             raise RuntimeError("No images found on this axes to build a colorbar.")
-        im = ax.images[-1]                 # 取最后一个 imshow 层
-        #im.set_interpolation('nearest')    # 可选：避免视觉偏移
+        im = ax.images[-1]                 # Take the last imshow layer
+        #im.set_interpolation('nearest')    # Optional: Avoid visual deviation
         if cmap is not None:
-            im.set_cmap(cmap)              # 如需改色图，在图像对象上改
-        # 创建 colorbar（注意传 im，而不是 set_interpolation 的返回值）
+            im.set_cmap(cmap)              
         cb = fig.colorbar(im, ax=ax, location=cb_loct, fraction=cb_size, pad=color_pad)
 
-        # 显示空间(0..1)等间距的刻度位置
+        # Display space (0..1) Equal-spaced scale positions
         a, b = span
         if not (0.0 <= a < b <= 1.0):
             raise ValueError("span must be within [0,1] and a < b.")
         ticks_disp = np.linspace(a, b, max(2, int(ticks_n)))
-        # 反变换到线性值用于标签
+        # Reverse transformation to linear values for labels
         ticks_lin = ShowMap.inv_stretch_scalar(ticks_disp, alpha, cbmin, cbmax)
-
         cb.set_ticks(ticks_disp)
         cb.set_ticklabels([fmt.format(t) for t in ticks_lin])
         if cb_lab is not None:
@@ -770,7 +765,7 @@ class ShowMap:
         data_new_spec = np.ones(data.shape)
         data_new_spec[:,:] = np.nan
         mask_data = np.where(mask, data, np.nan)
-        sigma_pix = sigma_pix                  # 0.6~1.2 之间调
+        sigma_pix = sigma_pix                  # Between 0.6~1.2
         soft = convolve(mask.astype(float), Gaussian2DKernel(sigma_pix),boundary='extend', nan_treatment='interpolate')
         alpha = np.clip(soft, 0.0, 1.0) # Normalize soft to [0,1] as transparency (alpha)
         return mask_data, alpha
