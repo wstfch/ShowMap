@@ -11,5 +11,11 @@ pip install -e .
 ## Usage
 
 ```bash
-fits-show-map image.fits --cmap viridis --savefig
+Examp:
+from fits_show_map import ShowMap
+path = '/Users/wst/galaxies/NGC2442/spx_index/'
+filename = 'NGC2442_EMU_SB59742_I'
+inf = path + filename + '.fits'
+header, data = ShowMap.load_fits_image(inf)
+ShowMap.show_fits(header=header,data=data,colobar=True)
 ```
