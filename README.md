@@ -8,6 +8,7 @@ A small WCS-aware FITS image viewer / helper toolkit.
 git clone https://github.com/wstfch/ShowMap.git
 cd ShowMap
 pip install -e .
+
 Check:
 pip show fits-show-map
 ```
