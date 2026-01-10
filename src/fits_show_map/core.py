@@ -333,7 +333,7 @@ class ShowMap:
     def show_fits(header, data, lim_image=False,colobar=False,beam=False,cont=False,log=False, fontsize = 20, cmap='viridis', figsize=(12, 9), auto_scaler=True, max=99, min=0,cb_dedi='%0.2f',xpad=1,ypad=2,line_width=2,alpha_lim=None,\
                 cb_pad=0.007,cb_loct='right',cb_font=20, cb_aspect=None,cb_shrink=None,cb_percent=False,cb_show_ticks=True, decimals=1,direction='in',tick_maj_len=8,tick_minor_len=4,tick_ra_spac=0.1,tick_dec_spac=0.1,tick_freq=5,set_minor=False,\
                 title=None, title_pad=10, cb_lab=None, beam_p_pix=[15, 15], beam_fluc=[2, 2], beam_color='red', line_color='w', ticks=None, beam_sque=True,\
-                beam_sque_linw=1.2,RA=None,DEC=None,NAXIS1=None,NAXIS2=None,savefits=None,cont_data=None,cont_levels=None,cont_color='red',\
+                beam_sque_linw=1.2,RA='RIGHT ASCENSION (J2000)',DEC='DECLINATION (J2000)',NAXIS1=None,NAXIS2=None,savefits=None,cont_data=None,cont_levels=None,cont_color='red',\
                 alpha = 100, ticks_n=7, cb_size=0.08, color_pad=0.01, span=(0.1, 0.9),fmt="{:.2f}",cbmin=None,cbmax=None,\
                 cont_alpha=0.8,CRPIX1=None,CRPIX2=None,CDELT1=None,CDELT2=None,rotate=None,savefig=None,dpi=300):
         
@@ -387,13 +387,13 @@ class ShowMap:
             if cont_data is None: cont_data=data  
             ShowMap.show_contour(ax, cont_data=cont_data, cont_levels=cont_levels, cont_color=cont_color, cont_alpha=cont_alpha) 
 
-        plt.rcParams['xtick.direction'] = 'in'
-        plt.rcParams['ytick.direction'] = 'in'
+        plt.rcParams['xtick.direction'] = direction
+        plt.rcParams['ytick.direction'] = direction
         # Set the coord interval of RA and DEC
         #ax.coords[0].set_ticks(spacing=0.08 * u.deg, exclude_overlapping=True)  
         #ax.coords[1].set_ticks(spacing=0.06 * u.deg, exclude_overlapping=True)
-        ax.set_xlabel('RIGHT ASCENSION (J2000)', labelpad=xpad)
-        ax.set_ylabel('DECLINATION (J2000)', labelpad=ypad)
+        ax.set_xlabel(RA, labelpad=xpad)
+        ax.set_ylabel(DEC, labelpad=ypad)
         ax.set_title(title,fontsize=fontsize,pad=title_pad)
         #ax.tick_params(direction='in', width=line_width, length=8, color=line_color)
         ShowMap.show_tick(ax,set_minor=set_minor,direction=direction,line_color=line_color,line_width=line_width,tick_maj_len=tick_maj_len,\
@@ -404,7 +404,7 @@ class ShowMap:
             #print('The {}.png has saved!!!'.format(self.filename))
             print('The picture has saved in:',savefig)
         #plt.show()
-        return [fig,ax]
+        return [fig, ax]
 
 
     @staticmethod
