@@ -623,6 +623,9 @@ class ShowMap:
             lon.tick_params(which='minor',length=tick_minor_len)
             lat.tick_params(which='minor',length=tick_minor_len)
 
+            lon.set_ticks_position('bt')   # bottom+top
+            lat.set_ticks_position('lr')   # left+right
+
         else:
             ax.tick_params(direction=direction, width=line_width, length=tick_maj_len, color=line_color)
         
