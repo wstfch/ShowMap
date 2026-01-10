@@ -35,6 +35,7 @@ ax.set_ylabel('DEC (J2000)',labelpad=1)
 ax.set_xlabel('RA (J2000)',labelpad=1)
 
 However, all the functions of image detail adjustment can be fully implemented in "show_fits" without the need for additional links. For example:
+
 fig,ax=ShowMap.show_fits(header=header,data=data,colobar=True,fontsize=23,beam=True,cmap='jet',cb_dedi='%0.4f',\
                         RA='RA (J2000)', DEC='DEC (J2000)', title='NGC2442', beam_color='r',\
                         beam_p_pix=[20,20], beam_fluc=[6,6], savefig='./NGC2442.pdf', dpi=100,\
