@@ -18,6 +18,10 @@ pip uninstall fits-show-map
 
 ```bash
 Examp:
+1. Quickly in your terminal show a fits image
+fits-show-map your.fits
+
+2. In jupyter
 from fits_show_map import ShowMap
 path = '/Users/wst/galaxies/NGC2442/spx_index/'
 filename = 'NGC2442_EMU_SB59742_I'
