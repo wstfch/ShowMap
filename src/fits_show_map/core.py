@@ -409,8 +409,7 @@ class ShowMap:
 
     @staticmethod
     def show_fits_multi(headers, data_list, \
-                        nrows=1, ncols=2, figsize=(12, 9),\
-                        lim_image=False, colobar_list=None, beam=False, cont_list=None,\
+                        nrows=1, ncols=2, figsize=(12, 9),colobar_list=None, cont_list=None,\
                         fontsize=20, cmap_list=None, auto_scaler=True, x_label_list=None, y_label_list=None,y_label_hide_list=None,wspace=0., hspace=0., \
                         max_list=None, min_list=None, cb_dedi_list=None, \
                         xpad_list=None, ypad_list=None, line_width_list=None, \
@@ -514,7 +513,7 @@ class ShowMap:
         if savefig is not None:
             plt.savefig(savefig, bbox_inches='tight', dpi=dpi)
             print(f'The figure has been saved at: {savefig}')
-        #return fig
+        return [fig, im]
 
     # To draw the colorbar
     @staticmethod
