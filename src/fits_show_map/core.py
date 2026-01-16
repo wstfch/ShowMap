@@ -312,7 +312,7 @@ class ShowMap:
             hdu0['PC2_2'] = PC2_2
         # Reproject the data
         hdu = pf.PrimaryHDU(data0, header=header0)
-        data, footprint = reproject_exact(hdu, hdu0, shape_out=(NAXIS2, NAXIS1))
+        data, footprint = reproject_interp(hdu, hdu0, shape_out=(NAXIS2, NAXIS1))
         # To filling the Nan for the image
         if fill_nan:
             def nan_mean_filter(values):
