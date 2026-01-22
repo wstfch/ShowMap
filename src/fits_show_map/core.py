@@ -883,7 +883,7 @@ class ShowMap:
         # MJy/sr, Jy/pixel, Jy/arcsec^2, etc.
         return "no_scale"
         
-    def smooth_fits(self, hdr, data, outfile,target_bmaj,target_bmin=None,target_bpa=None,method="fft",\
+    def smooth_fits(hdr, data, outfile,target_bmaj,target_bmin=None,target_bpa=None,method="fft",\
                 unit_mode="auto",beam_scale=True,preserve_nan=True,nan_treatment="interpolate",\
                 kernel_truncate=4.0):
         """
@@ -1015,7 +1015,7 @@ class ShowMap:
             f"tg=({target_bmaj:.3f}\",{target_bmin:.3f}\",{target_bpa:.2f}deg), "
             f"unit_mode={mode}, beam_scale={beam_scale}, scale_factor={scale_factor:.6g}")
         
-        fits.writeto(outfile, data_sm, header=hdr_new, overwrite=True)
+        pf.writeto(outfile, data_sm, header=hdr_new, overwrite=True)
         print(f"Done: {in_bmaj:.2f}\"x{in_bmin:.2f}\" -> {target_bmaj:.2f}\"x{target_bmin:.2f}\", "
               f"BPA {in_bpa:.1f}->{target_bpa:.1f} deg, scale={scale_factor:.6g}")
         print(f"Saved to {outfile}")
