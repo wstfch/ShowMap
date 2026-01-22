@@ -26,7 +26,7 @@ from reproject import reproject_interp, reproject_exact
 from scipy.ndimage import generic_filter
 from copy import deepcopy
 from astropy import units as u
-from astropy.convolution import convolve, Gaussian2DKernel
+from astropy.convolution import convolve, Gaussian2DKernel, convolve_fft
 import os,sys,re
 plt.rcParams.update({'font.size': 18})
 
@@ -171,7 +171,7 @@ class ShowMap:
     Date:2023.7.31
     Author: Shengtao Wang 
     This script is used to show one or more fits images and some convenient functions,
-    (including map rotate, filling the Nan, cut large image to smaller, regrid, loading fits to standard 2D images, etc.)
+    (including map rotate, filling the Nan, cut large image to smaller, regrid, loading fits to standard 2D images, map smooth, etc.)
     You can also use it in combination with matplotlib for more convenience
     """
     # def __init__(self, fits=False, header=False, data=False, lim_image=False,fontsize=20, colobar=False, beam=False, cont=False):
@@ -822,6 +822,205 @@ class ShowMap:
         out_hdr = out_wcs.to_header()
         #fits.PrimaryHDU(data=out_data, header=out_hdr).writeto(outfile, overwrite=overwrite)
         return out_hdr, out_data
+
+    # Do smooth fits image 
+    def _fwhm_to_sigma(self, fwhm):
+        return fwhm / 2.354820045  # more precise than 2.355
+        
+    def _beam_area_arcsec2(self, bmaj_arcsec, bmin_arcsec):
+        # Gaussian beam area: Omega = 1.1331 * FWHM_maj * FWHM_min
+        return 1.1331 * bmaj_arcsec * bmin_arcsec
+
+    def _beam_cov_pix2(self, bmaj_arcsec, bmin_arcsec, bpa_deg, pixscale_arcsec):
+        """
+        Build 2x2 covariance matrix (in pixel^2) for a 2D Gaussian beam.
+        bpa_deg: position angle in degrees.
+        NOTE: This is an approximation in image (x,y) coords.
+        """
+        sig_maj = self._fwhm_to_sigma(bmaj_arcsec) / pixscale_arcsec
+        sig_min = self._fwhm_to_sigma(bmin_arcsec) / pixscale_arcsec
+        th = np.deg2rad(bpa_deg)
+        c, s = np.cos(th), np.sin(th)
+        R = np.array([[c, -s],
+                      [s,  c]], dtype=float)
+        D = np.diag([sig_maj**2, sig_min**2])
+        return R @ D @ R.T
+        
+    def _cov_to_gaussian_params(self, cov):
+        """
+        Convert 2x2 covariance matrix to (sigma_x, sigma_y, theta).
+        Returns sig1>=sig2 and theta (rad) of major axis.
+        """
+        w, v = np.linalg.eigh(cov)  # w ascending
+        if np.any(w <= 0):
+            raise ValueError("Kernel covariance is not positive definite; target beam may not be larger than current beam.")
+        # major axis = larger eigenvalue
+        sig2 = np.sqrt(w[0])
+        sig1 = np.sqrt(w[1])
+        vec_major = v[:, 1]  # eigenvector for w[1]
+        theta = np.arctan2(vec_major[1], vec_major[0])  # radians
+        return sig1, sig2, theta
+        
+    def _guess_unit_mode(self, hdr, unit_mode="auto"):
+        """
+        unit_mode:
+          - "auto": decide from BUNIT
+          - "jy/beam": force treat as Jy/beam
+          - "no_scale": never scale
+        """
+        # normalize user input
+        um = unit_mode.strip().lower()
+        if um in ["jy/beam", "jybeam", "beam"]:
+            return "jy/beam"
+        if um in ["no_scale", "noscale", "none"]:
+            return "no_scale"
+    
+        # read and normalize BUNIT
+        bunit = (hdr.get("BUNIT", "") or "").strip().lower()
+        # common Jy/beam variants seen in FITS
+        if ("jy/beam" in bunit or "jy beam" in bunit or "jyperbeam" in bunit or "jybm" in bunit):
+            return "jy/beam"
+        # MJy/sr, Jy/pixel, Jy/arcsec^2, etc.
+        return "no_scale"
+        
+    def smooth_fits(self, hdr, data, outfile,target_bmaj,target_bmin=None,target_bpa=None,method="fft",\
+                unit_mode="auto",beam_scale=True,preserve_nan=True,nan_treatment="interpolate",\
+                kernel_truncate=4.0):
+        """
+        Smooth a FITS image to a target Gaussian resolution.
+        Parameters
+        ----------
+        infile, outfile : str
+            Input/output FITS.
+        target_bmaj : float
+            Target major-axis FWHM [arcsec].
+        target_bmin : float or None
+            Target minor-axis FWHM [arcsec]. If None, assume circular = target_bmaj.
+        target_bpa : float or None
+            Target BPA [deg]. If None, keep input BPA if exists else 0.
+        method : {"fft","direct","scipy"}
+            Convolution method.
+        unit_mode : {"auto","jy/beam","no_scale"}
+            How to interpret units for scaling.
+        beam_scale : bool
+            If unit is Jy/beam, apply beam-area scaling to keep output in Jy/beam (target beam).
+            For MJy/sr or Jy/pixel, scaling is NOT applied regardless.
+        preserve_nan : bool
+            Keep NaN in output.
+        nan_treatment : {"interpolate","fill"}
+            How convolution treats NaN.
+        kernel_truncate : float
+            Kernel half-size in sigmas, typical 4~5 is enough.
+        Notes
+        -----
+        - For MJy/sr and Jy/pixel: no additional flux scaling is applied (normalized kernel already ok).
+        - For Jy/beam: if beam_scale=True, output is rescaled by (Omega_target/Omega_in).
+        """
+        if target_bmin is None:
+            target_bmin = target_bmaj
+    
+    #     data, hdr = fits.getdata(infile, header=True)
+    #     data = np.squeeze(np.array(data, dtype=float))
+    
+        # pixel scale (arcsec/pix); assume square pixels
+        if "CDELT1" in hdr:
+            pixscale = abs(hdr["CDELT1"]) * 3600.0
+        elif "CD1_1" in hdr:
+            pixscale = abs(hdr["CD1_1"]) * 3600.0
+            hdr['CDELT1'] = hdr['CD1_1']
+            hdr['CDELT2'] = hdr['CD2_2']
+            del hdr["CD1_1"] 
+            del hdr["CD1_2"]
+            del hdr["CD2_1"]
+            del hdr["CD2_2"]
+            
+        else:
+            raise ValueError("Cannot find pixel scale (CDELT1 or CD1_1) in header.")
+    
+        # input beam from header (deg -> arcsec)
+        if "BMAJ" not in hdr or "BMIN" not in hdr:
+            raise ValueError("Input FITS missing BMAJ/BMIN in header (needed for beam matching).")
+    
+        in_bmaj = hdr["BMAJ"] * 3600.0
+        in_bmin = hdr["BMIN"] * 3600.0
+        in_bpa = float(hdr.get("BPA", 0.0))
+    
+        # choose target BPA
+        if target_bpa is None:
+            target_bpa = in_bpa if np.isfinite(in_bpa) else 0.0
+    
+        # ensure target is larger (in covariance sense)
+        cov_in = self._beam_cov_pix2(in_bmaj, in_bmin, in_bpa, pixscale)
+        cov_tg = self._beam_cov_pix2(target_bmaj, target_bmin, target_bpa, pixscale)
+        cov_ker = cov_tg - cov_in
+    
+        # If already equal-ish, just copy + header update
+        if np.allclose(cov_ker, 0, atol=1e-12, rtol=1e-6):
+            hdr_new = hdr.copy()
+            hdr_new["BMAJ"] = target_bmaj / 3600.0
+            hdr_new["BMIN"] = target_bmin / 3600.0
+            hdr_new["BPA"]  = float(target_bpa)
+            hdr_new.add_history("smooth_fits: no smoothing needed (target ~ input).")
+            fits.writeto(outfile, data, header=hdr_new, overwrite=True)
+            print("No smoothing needed; copied to", outfile)
+            return
+    
+        # kernel parameters
+        sig1, sig2, theta = self._cov_to_gaussian_params(cov_ker)  # pixels, pixels, radians
+        sig_max = max(sig1, sig2)
+    
+        # adaptive kernel size
+        half = int(np.ceil(kernel_truncate * sig_max))
+        half = max(half, 3)
+        size = 2 * half + 1  # odd
+    
+        # build kernel (theta rotates major axis)
+        kernel = Gaussian2DKernel(sig1, sig2, theta=theta, x_size=size, y_size=size)
+        kernel.normalize()
+    
+        # convolve
+        if method == "fft":
+            data_sm = convolve_fft(data, kernel,boundary="fill",fill_value=np.nan,\
+                                   nan_treatment=nan_treatment,normalize_kernel=True,\
+                                   preserve_nan=preserve_nan,allow_huge=True)
+        elif method == "direct":
+            data_sm = convolve(data, kernel,boundary="extend",nan_treatment=nan_treatment,\
+                normalize_kernel=True,preserve_nan=preserve_nan)
+        elif method == "scipy":
+            if not _HAS_SCIPY:
+                raise ImportError("scipy not available; install scipy or use method='fft'/'direct'.")
+            # scipy is isotropic only -> approximate with mean sigma
+            sigma_pix = 0.5 * (sig1 + sig2)
+            data_sm = gaussian_filter(data, sigma=sigma_pix, mode="nearest")
+        else:
+            raise ValueError(f"Unknown method '{method}'")
+        # unit handling
+        mode = self._guess_unit_mode(hdr, unit_mode=unit_mode)
+        if mode == "jy/beam" and beam_scale:
+            # convert Jy/beam_in -> Jy/beam_target
+            omega_in = self._beam_area_arcsec2(in_bmaj, in_bmin)
+            omega_tg = self._beam_area_arcsec2(target_bmaj, target_bmin)
+            scale_factor = omega_tg / omega_in
+            data_sm = data_sm * scale_factor
+        else:
+            scale_factor = 1.0
+        # update header
+        hdr_new = hdr.copy()
+        hdr_new["BMAJ"] = target_bmaj / 3600.0
+        hdr_new["BMIN"] = target_bmin / 3600.0
+        hdr_new["BPA"]  = float(target_bpa)
+        hdr_new.add_history(
+            f"smooth_fits: method={method}, kernel_size={size}, "
+            f"in=({in_bmaj:.3f}\",{in_bmin:.3f}\",{in_bpa:.2f}deg) -> "
+            f"tg=({target_bmaj:.3f}\",{target_bmin:.3f}\",{target_bpa:.2f}deg), "
+            f"unit_mode={mode}, beam_scale={beam_scale}, scale_factor={scale_factor:.6g}")
+        
+        fits.writeto(outfile, data_sm, header=hdr_new, overwrite=True)
+        print(f"Done: {in_bmaj:.2f}\"x{in_bmin:.2f}\" -> {target_bmaj:.2f}\"x{target_bmin:.2f}\", "
+              f"BPA {in_bpa:.1f}->{target_bpa:.1f} deg, scale={scale_factor:.6g}")
+        print(f"Saved to {outfile}")
+        
+        
                     
 
 
