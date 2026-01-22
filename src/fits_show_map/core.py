@@ -883,7 +883,7 @@ class ShowMap:
         # MJy/sr, Jy/pixel, Jy/arcsec^2, etc.
         return "no_scale"
         
-    def smooth_fits(self, hdr, data, outfile,target_bmaj,target_bmin=None,target_bpa=None,method="fft",\
+    def _smooth_fits_impl(self, hdr, data, outfile,target_bmaj,target_bmin=None,target_bpa=None,method="fft",\
                 unit_mode="auto",beam_scale=True,preserve_nan=True,nan_treatment="interpolate",\
                 kernel_truncate=4.0):
         """
@@ -1019,6 +1019,19 @@ class ShowMap:
         print(f"Done: {in_bmaj:.2f}\"x{in_bmin:.2f}\" -> {target_bmaj:.2f}\"x{target_bmin:.2f}\", "
               f"BPA {in_bpa:.1f}->{target_bpa:.1f} deg, scale={scale_factor:.6g}")
         print(f"Saved to {outfile}")
+
+    @classmethod
+    def smooth_fits(cls, hdr, data, outfile, target_bmaj, target_bmin=None, target_bpa=None,\
+                    method="fft", unit_mode="auto", beam_scale=True, preserve_nan=True,\
+                    nan_treatment="interpolate", kernel_truncate=4.0):
+        obj = cls()
+        return obj._smooth_fits_impl(
+            hdr, data, outfile, target_bmaj,\
+            target_bmin=target_bmin, target_bpa=target_bpa,\
+            method=method, unit_mode=unit_mode, beam_scale=beam_scale,\
+            preserve_nan=preserve_nan, nan_treatment=nan_treatment,\
+            kernel_truncate=kernel_truncate
+        )
         
         
                     
