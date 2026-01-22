@@ -883,7 +883,7 @@ class ShowMap:
         # MJy/sr, Jy/pixel, Jy/arcsec^2, etc.
         return "no_scale"
         
-    def smooth_fits(hdr, data, outfile,target_bmaj,target_bmin=None,target_bpa=None,method="fft",\
+    def smooth_fits(self, hdr, data, outfile,target_bmaj,target_bmin=None,target_bpa=None,method="fft",\
                 unit_mode="auto",beam_scale=True,preserve_nan=True,nan_treatment="interpolate",\
                 kernel_truncate=4.0):
         """
