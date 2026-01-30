@@ -339,7 +339,7 @@ class ShowMap:
                 alpha = 100, ticks_n=7, cb_size=0.08, color_pad=0.01, span=(0.1, 0.9),fmt="{:.2f}",cbmin=None,cbmax=None,\
                 cont_alpha=0.8,CRPIX1=None,CRPIX2=None,CDELT1=None,CDELT2=None,rotate=None,savefig=None,dpi=300):
         
-        plt.rcParams.update({'font.size': 20})
+        plt.rcParams.update({'font.size': fontsize})
         #header, data = self.header,self.data
         #fontsize=self.fontsize
         if lim_image:
