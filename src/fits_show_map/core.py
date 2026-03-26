@@ -412,8 +412,8 @@ class ShowMap:
     @staticmethod
     def show_fits_multi(headers, data_list, \
                         nrows=1, ncols=2, figsize=(12, 9),colobar_list=None, cont_list=None,\
-                        fontsize=20, cmap_list=None, auto_scaler=True, x_label_list=None, y_label_list=None,y_label_hide_list=None,wspace=0., hspace=0., \
-                        max_list=None, min_list=None, cb_dedi_list=None, \
+                        fontsize=20, cmap_list=None, auto_scaler=True, x_label_list=None, y_label_list=None,y_label_hide_list=None,x_label_hide_list=None, \
+                        wspace=0., hspace=0., max_list=None, min_list=None, cb_dedi_list=None, \
                         xpad_list=None, ypad_list=None, line_width_list=None, \
                         cb_pad_list=None, cb_loct_list=None, cb_font_list=None, \
                         cb_aspect_list=None, cb_shrink_list=None, cb_percent_list=None, \
@@ -470,6 +470,7 @@ class ShowMap:
         cont_levels_list = cont_levels_list or [None] * num_plots
         cont_color_list = cont_color_list or ['red'] * num_plots
         y_label_hide_list = y_label_hide_list or [False] * num_plots
+        x_label_hide_list = x_label_hide_list or [False] * num_plots
         
         # Create figure and subplots
         #fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize, squeeze=False)
@@ -505,6 +506,8 @@ class ShowMap:
             # Set Labels and Title
             ax.set_xlabel(x_label_list[i], labelpad=xpad_list[i])
             ax.set_ylabel(y_label_list[i], labelpad=ypad_list[i])
+            if x_label_hide_list[i]:
+                ax.coords[0].set_ticklabel_visible(False)  # Hide the x-axis label
             if y_label_hide_list[i]:
                 ax.coords[1].set_ticklabel_visible(False)  # Hide the y-axis label
             if title_list[i] is not None:
