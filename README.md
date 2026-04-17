@@ -21,9 +21,15 @@ pip uninstall fits-show-map
 ```bash
 Examp:
 1. Quickly in your terminal show a fits image
-fits-show-map your.fits
+fits-show-map your.fits --cmap inferno --savefig
 
-2. In jupyter
+2. ShowMap.load_fits_image
+load_fits_image(filename) reads a FITS file, reduces it to a 2D image, and cleans the header so the WCS remains usable for plotting. It supports FITS arrays with 2 to 5 axes by extracting the leading 2D image plane, removes higher-dimensional WCS keywords, records the x/y coordinate indices in the header, converts AIPS beam keywords to standard BMAJ/BMIN/BPA when available, and can derive CDELT from PIXSCAL.
+Example:
+from fits_show_map import ShowMap
+header, data = load_fits_image("NGC2442_EMU_SB59742_I.fits")
+
+2. Use the model ShowMap
 from fits_show_map import ShowMap
 inf = '/Users/wst/galaxies/NGC2442/NGC2442_EMU_SB59742_I.fits'
 header, data = ShowMap.load_fits_image(inf)
