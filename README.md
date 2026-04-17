@@ -24,7 +24,9 @@ Examp:
 fits-show-map your.fits --cmap inferno --savefig
 
 2. ShowMap.load_fits_image
-load_fits_image(filename) reads a FITS file, reduces it to a 2D image, and cleans the header so the WCS remains usable for plotting. It supports FITS arrays with 2 to 5 axes by extracting the leading 2D image plane, removes higher-dimensional WCS keywords, records the x/y coordinate indices in the header, converts AIPS beam keywords to standard BMAJ/BMIN/BPA when available, and can derive CDELT from PIXSCAL.
+load_fits_image(filename) reads a FITS file, reduces it to a 2D image, and cleans the header so the WCS remains usable for plotting.
+It supports FITS arrays with 2 to 5 axes by extracting the leading 2D image plane, removes higher-dimensional WCS keywords,
+records the x/y coordinate indices in the header, converts AIPS beam keywords to standard BMAJ/BMIN/BPA when available, and can derive CDELT from PIXSCAL.
 Example:
 from fits_show_map import ShowMap
 header, data = load_fits_image("NGC2442_EMU_SB59742_I.fits")
