@@ -24,17 +24,8 @@ pip show fits-show-map
 pip uninstall fits-show-map
 ```
 
-## This package depends on `numpy`, `astropy`, `matplotlib`, `regions`, `reproject`, and `scipy`.
-
-
 ## Functions
 ### 1. You can quickly show a FITS image in the terminal with:
-
-```bash
-fits-show-map your.fits
-```
-
-You can also choose a colormap and save a PNG image:
 
 ```bash
 fits-show-map your.fits --cmap inferno --savefig
@@ -42,31 +33,15 @@ fits-show-map your.fits --cmap inferno --savefig
 
 The command-line interface takes the FITS file path as the main input, `--cmap` for the matplotlib colormap name, and `--savefig` to save a PNG image next to the FITS file.
 
-You can also use the package in Python:
+### 2. You can also use the package in Python:
 
 ```python
-from fits_show_map import ShowMap, load_fits_image, show_map
-```
-
-For a quick display:
-
-```python
-from fits_show_map import show_map
-
-show_map("your.fits", cmap="viridis", savefig="True")
+from fits_show_map import ShowMap
 ```
 
 `load_fits_image(filename)` reads a FITS file, reduces it to a 2D image, and cleans the header so the WCS remains usable for plotting. It supports FITS arrays with 2 to 5 axes by extracting the leading 2D image plane, removes higher-dimensional WCS keywords, records the x/y coordinate indices in the header, converts AIPS beam keywords to standard `BMAJ`, `BMIN`, and `BPA` when available, and can derive `CDELT` from `PIXSCAL`.
 
 Example:
-
-```python
-from fits_show_map import load_fits_image
-
-header, data = load_fits_image("NGC2442_EMU_SB59742_I.fits")
-```
-
-You can also use the class interface:
 
 ```python
 from fits_show_map import ShowMap
