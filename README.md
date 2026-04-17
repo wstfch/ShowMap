@@ -268,6 +268,8 @@ ShowMap.draw_arrow(
 )
 ```
 
+#### 2.4 show_fits_multi
+
 `ShowMap.show_fits_multi(...)` is used to display multiple FITS images in a multi-panel layout. This is useful for comparisons between different bands, resolutions, or data products.
 
 Example:
@@ -290,7 +292,7 @@ fig, im = ShowMap.show_fits_multi(
     beam_list=[True, False]
 )
 ```
-
+### 3. cutout_2D
 `ShowMap.cutout_2D(...)` creates a fast 2D cutout from a FITS image using sky coordinates. You must provide either `size_pix` or `size_arcsec`.
 
 Example using pixel size:
@@ -314,7 +316,7 @@ out_hdr, out_data = ShowMap.cutout_2D(
     size_arcsec=(300, 300)
 )
 ```
-
+### 4. carta_log_stretch
 `ShowMap.carta_log_stretch(...)` applies a CARTA-like logarithmic stretch to an image array.
 
 Example:
@@ -334,4 +336,4 @@ masked_data, alpha = ShowMap.smooth_edge(data, sigma_pix=1.0, mask=mask)
 fig, ax = ShowMap.show_fits(header=header, data=masked_data, alpha_lim=alpha)
 ```
 
-In summary, the most commonly used functions are `load_fits_image`, `show_map`, `ShowMap.load_fits_image`, `ShowMap.project`, `ShowMap.show_fits`, `ShowMap.show_fits_multi`, `ShowMap.show_contour`, `ShowMap.show_beam`, `ShowMap.show_colobar`, `ShowMap.show_tick`, `ShowMap.draw_scalebar`, `ShowMap.draw_arrow`, `ShowMap.cutout_2D`, `ShowMap.carta_log_stretch`, and `ShowMap.smooth_edge`. For quick visualization, `fits-show-map your.fits` or `show_map("your.fits")` is often enough. For more advanced figure production, `ShowMap.show_fits(...)` and `ShowMap.show_fits_multi(...)` provide most of the functionality needed for astronomical plotting.
+In summary, the most commonly used functions are  `ShowMap.load_fits_image`, `ShowMap.project`, `ShowMap.show_fits`, `ShowMap.show_fits_multi`, `ShowMap.show_contour`, `ShowMap.show_beam`, `ShowMap.show_colobar`, `ShowMap.show_tick`, `ShowMap.draw_scalebar`, `ShowMap.draw_arrow`, `ShowMap.cutout_2D`, `ShowMap.carta_log_stretch`, and `ShowMap.smooth_edge`. For more advanced figure production, `ShowMap.show_fits(...)` and `ShowMap.show_fits_multi(...)` provide most of the functionality needed for astronomical plotting.
