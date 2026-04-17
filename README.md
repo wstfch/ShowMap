@@ -12,21 +12,23 @@ cd ShowMap
 pip install -e .
 ```
 
-To check whether the installation was successful:
+## To check whether the installation was successful:
 
 ```bash
 pip show fits-show-map
 ```
 
-To uninstall the package:
+## To uninstall the package:
 
 ```bash
 pip uninstall fits-show-map
 ```
 
-This package depends on `numpy`, `astropy`, `matplotlib`, `regions`, `reproject`, and `scipy`.
+## This package depends on `numpy`, `astropy`, `matplotlib`, `regions`, `reproject`, and `scipy`.
 
-You can quickly show a FITS image in the terminal with:
+
+## Functions
+### 1. You can quickly show a FITS image in the terminal with:
 
 ```bash
 fits-show-map your.fits
