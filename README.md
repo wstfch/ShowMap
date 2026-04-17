@@ -4,7 +4,7 @@ A small WCS-aware FITS image viewer and helper toolkit for astronomy.
 
 `fits-show-map` is a lightweight Python package for displaying and manipulating FITS images with WCS information. It supports both quick command-line visualization and flexible Python workflows, and is designed to be simple, practical, and convenient for everyday astronomical image analysis and figure production. The package can be used to load FITS images into a clean 2D format, display images with WCS axes, reproject and rotate images, generate cutouts, make single-panel and multi-panel figures, overlay contours, draw beam ellipses, add colorbars, customize ticks, draw scalebars and arrows, and apply a CARTA-like logarithmic stretch for display.
 
-To install the package:
+## To install the package:
 
 ```bash
 git clone https://github.com/wstfch/ShowMap.git
