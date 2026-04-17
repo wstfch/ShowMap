@@ -38,8 +38,9 @@ The command-line interface takes the FITS file path as the main input, `--cmap` 
 ```python
 from fits_show_map import ShowMap
 ```
+#### 2.1 load_fits_image
 
-`load_fits_image(filename)` reads a FITS file, reduces it to a 2D image, and cleans the header so the WCS remains usable for plotting. It supports FITS arrays with 2 to 5 axes by extracting the leading 2D image plane, removes higher-dimensional WCS keywords, records the x/y coordinate indices in the header, converts AIPS beam keywords to standard `BMAJ`, `BMIN`, and `BPA` when available, and can derive `CDELT` from `PIXSCAL`.
+`ShowMap.load_fits_image(filename)` reads a FITS file, reduces it to a 2D image, and cleans the header so the WCS remains usable for plotting. It supports FITS arrays with 2 to 5 axes by extracting the leading 2D image plane, removes higher-dimensional WCS keywords, records the x/y coordinate indices in the header, converts AIPS beam keywords to standard `BMAJ`, `BMIN`, and `BPA` when available, and can derive `CDELT` from `PIXSCAL`.
 
 Example:
 
@@ -49,7 +50,7 @@ from fits_show_map import ShowMap
 inf = "/Users/wst/galaxies/NGC2442/NGC2442_EMU_SB59742_I.fits"
 header, data = ShowMap.load_fits_image(inf)
 ```
-
+#### 2.2 project
 `ShowMap.project(...)` can reproject, recenter, rotate, and regrid an image to a new WCS. This is useful when you want to compare maps with different image sizes, pixel scales, centers, or orientations.
 
 Example:
@@ -73,7 +74,7 @@ new_header, new_data = ShowMap.project(
     fill_size=25
 )
 ```
-
+#### 2.3 Show_fits
 `ShowMap.show_fits(...)` is the main plotting function for a single image. It supports WCS-aware plotting, beam drawing, colorbars, contour overlays, custom labels, titles, saving figures, saving output FITS files, and logarithmic-style display. In many cases, most figure adjustments can be completed directly inside `show_fits(...)` without additional matplotlib commands.
 
 Example:
