@@ -827,7 +827,7 @@ class ShowMap:
         return out_hdr, out_data
         
     @staticmethod
-    def recenter_header(header, data=None, center_only=False, verbose=True):
+    def recenter_header(header, data=None, center_only=True, verbose=True):
         """
         Recenter CRPIX1/2 to the geometric center of the image.
         Parameters
