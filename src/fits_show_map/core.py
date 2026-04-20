@@ -330,6 +330,24 @@ class ShowMap:
         return hdu0, data
 
     @staticmethod
+    def project_to_reference(header0, data0, ref_header, fill_nan=False, fill_size=30):
+    """
+    Reproject data0/header0 onto the WCS grid defined by ref_header.
+    """
+    target_header = deepcopy(ref_header)
+    hdu_in = pf.PrimaryHDU(data0, header=header0)
+    data, footprint = reproject_interp(hdu_in, target_header, shape_out=(target_header['NAXIS2'], target_header['NAXIS1']))
+    if fill_nan:
+        def nan_mean_filter(values):
+            valid = values[np.isfinite(values)]
+            return np.mean(valid) if len(valid) > 0 else np.nan
+        nan_mask = np.isnan(data)
+        filled = data.copy()
+        filled[nan_mask] = generic_filter(data, nan_mean_filter, size=fill_size)[nan_mask]
+        data = filled
+    return target_header, data
+
+    @staticmethod
     def show_fits(header, data, lim_image=False,colobar=False,beam=False,cont=False,log=False, fontsize = 20, cmap='viridis', figsize=(12, 9), auto_scaler=True,\
                   max=99, min=0,cb_dedi='%0.2f',xpad=1,ypad=2,line_width=2,alpha_lim=None,ylabel='DECLINATION (J2000)',xlabel='RIGHT ASCENSION (J2000)',\
                 cb_pad=0.007,cb_loct='right',cb_font=20, cb_aspect=None,cb_shrink=None,cb_percent=False,cb_show_ticks=True, decimals=1,\
@@ -1025,7 +1043,7 @@ class ShowMap:
             hdr_new["BMIN"] = target_bmin / 3600.0
             hdr_new["BPA"]  = float(target_bpa)
             hdr_new.add_history("smooth_fits: no smoothing needed (target ~ input).")
-            fits.writeto(outfile, data, header=hdr_new, overwrite=True)
+            pf.writeto(outfile, data, header=hdr_new, overwrite=True)
             print("No smoothing needed; copied to", outfile)
             return
     
