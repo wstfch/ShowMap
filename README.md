@@ -299,7 +299,7 @@ Example using pixel size:
 
 ```python
 out_hdr, out_data = ShowMap.cutout_2D(
-    infile="your.fits",
+    hdr, data,
     ra_deg=114.099166,
     dec_deg=-69.530833,
     size_pix=(400, 400)
@@ -310,7 +310,7 @@ Example using angular size:
 
 ```python
 out_hdr, out_data = ShowMap.cutout_2D(
-    infile="your.fits",
+    hdr, data,
     ra_deg=114.099166,
     dec_deg=-69.530833,
     size_arcsec=(300, 300)
