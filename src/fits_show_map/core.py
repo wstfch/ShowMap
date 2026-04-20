@@ -331,21 +331,21 @@ class ShowMap:
 
     @staticmethod
     def project_to_reference(header0, data0, ref_header, fill_nan=False, fill_size=30):
-    """
-    Reproject data0/header0 onto the WCS grid defined by ref_header.
-    """
-    target_header = deepcopy(ref_header)
-    hdu_in = pf.PrimaryHDU(data0, header=header0)
-    data, footprint = reproject_interp(hdu_in, target_header, shape_out=(target_header['NAXIS2'], target_header['NAXIS1']))
-    if fill_nan:
-        def nan_mean_filter(values):
-            valid = values[np.isfinite(values)]
-            return np.mean(valid) if len(valid) > 0 else np.nan
-        nan_mask = np.isnan(data)
-        filled = data.copy()
-        filled[nan_mask] = generic_filter(data, nan_mean_filter, size=fill_size)[nan_mask]
-        data = filled
-    return target_header, data
+        """
+        Reproject data0/header0 onto the WCS grid defined by ref_header.
+        """
+        target_header = deepcopy(ref_header)
+        hdu_in = pf.PrimaryHDU(data0, header=header0)
+        data, footprint = reproject_interp(hdu_in, target_header, shape_out=(target_header['NAXIS2'], target_header['NAXIS1']))
+        if fill_nan:
+            def nan_mean_filter(values):
+                valid = values[np.isfinite(values)]
+                return np.mean(valid) if len(valid) > 0 else np.nan
+            nan_mask = np.isnan(data)
+            filled = data.copy()
+            filled[nan_mask] = generic_filter(data, nan_mean_filter, size=fill_size)[nan_mask]
+            data = filled
+        return target_header, data
 
     @staticmethod
     def show_fits(header, data, lim_image=False,colobar=False,beam=False,cont=False,log=False, fontsize = 20, cmap='viridis', figsize=(12, 9), auto_scaler=True,\
