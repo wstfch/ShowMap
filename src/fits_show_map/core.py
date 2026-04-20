@@ -825,6 +825,67 @@ class ShowMap:
         out_hdr = out_wcs.to_header()
         #fits.PrimaryHDU(data=out_data, header=out_hdr).writeto(outfile, overwrite=overwrite)
         return out_hdr, out_data
+        
+    @staticmethod
+    def recenter_header(header, data=None, center_only=False, verbose=True):
+        """
+        Recenter CRPIX1/2 to the geometric center of the image.
+        Parameters
+        ----------
+        header : astropy.io.fits.Header
+            FITS header containing WCS information.
+        data : ndarray, optional
+            Image data. Returned unchanged for convenience.
+        center_only : bool, optional
+            If True, only update CRPIX1/2 to the geometric center and keep CRVAL1/2 unchanged.
+            If False, also update CRVAL1/2 so that the sky position of the image remains unchanged.
+        verbose : bool, optional
+            If True, print old and new CRPIX/CRVAL values.
+        Returns
+        -------
+        header : astropy.io.fits.Header
+            Updated FITS header.
+        data : ndarray or None
+            Returned unchanged.
+        """
+        naxis1 = int(header["NAXIS1"])
+        naxis2 = int(header["NAXIS2"])
+    
+        # FITS pixel coordinates are 1-based
+        new_crpix1 = (naxis1 + 1) / 2.0
+        new_crpix2 = (naxis2 + 1) / 2.0
+    
+        old_crpix1 = float(header.get("CRPIX1", new_crpix1))
+        old_crpix2 = float(header.get("CRPIX2", new_crpix2))
+        old_crval1 = header.get("CRVAL1")
+        old_crval2 = header.get("CRVAL2")
+    
+        new_crval1 = old_crval1
+        new_crval2 = old_crval2
+    
+        if not center_only:
+            w = WCS(header, naxis=2)
+            if w.has_celestial:
+                w = w.celestial
+            new_crval1, new_crval2 = w.all_pix2world([[new_crpix1, new_crpix2]], 1)[0]
+            header["CRVAL1"] = float(new_crval1)
+            header["CRVAL2"] = float(new_crval2)
+            
+        header["CRPIX1"] = float(new_crpix1)
+        header["CRPIX2"] = float(new_crpix2)
+    
+        header.add_history(f"Recentered CRPIX1/2 to image geometric center ({new_crpix1:.1f}, {new_crpix2:.1f})")
+        if not center_only and old_crval1 is not None and old_crval2 is not None:
+            header.add_history("Updated CRVAL1/2 to sky coordinates at the new reference pixel")
+            
+        if verbose:
+            print(f"CRPIX : ({old_crpix1}, {old_crpix2}) -> ({new_crpix1}, {new_crpix2})")
+            if old_crval1 is not None and old_crval2 is not None:
+                if center_only:
+                    print(f"CRVAL : unchanged ({old_crval1}, {old_crval2})")
+                else:
+                    print("CRVAL :" f"({old_crval1}, {old_crval2}) -> ({new_crval1}, {new_crval2})")
+        return header, data
 
     # Do smooth fits image 
     def _fwhm_to_sigma(self, fwhm):
