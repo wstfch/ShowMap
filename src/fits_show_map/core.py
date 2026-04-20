@@ -778,7 +778,7 @@ class ShowMap:
         return mask_data, alpha
 
     @staticmethod
-    def cutout_2D(infile, ra_deg, dec_deg, size_pix=None, size_arcsec=None):
+    def cutout_2D(hdr, data, ra_deg, dec_deg, size_pix=None, size_arcsec=None):
         """
         Fast cutout from a large FITS image WITHOUT reproject/resampling.
         Parameters
@@ -795,7 +795,7 @@ class ShowMap:
         if (size_pix is None) == (size_arcsec is None):
             raise ValueError("Provide exactly one of size_pix or size_arcsec.")
 
-        hdr, data = ShowMap.load_fits_image(infile)
+        #hdr, data = ShowMap.load_fits_image(infile)
 
         # Handle possible extra dimensions (e.g., (1,1,Ny,Nx))
         # We cut the last two axes as (y,x)
