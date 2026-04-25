@@ -336,4 +336,28 @@ masked_data, alpha = ShowMap.smooth_edge(data, sigma_pix=1.0, mask=mask)
 fig, ax = ShowMap.show_fits(header=header, data=masked_data, alpha_lim=alpha)
 ```
 
-In summary, the most commonly used functions are  `ShowMap.load_fits_image`, `ShowMap.project`, `ShowMap.show_fits`, `ShowMap.show_fits_multi`, `ShowMap.show_contour`, `ShowMap.show_beam`, `ShowMap.show_colobar`, `ShowMap.show_tick`, `ShowMap.draw_scalebar`, `ShowMap.draw_arrow`, `ShowMap.cutout_2D`, `ShowMap.carta_log_stretch`, and `ShowMap.smooth_edge`. For more advanced figure production, `ShowMap.show_fits(...)` and `ShowMap.show_fits_multi(...)` provide most of the functionality needed for astronomical plotting.
+### 5. smooth_fits
+
+`ShowMap.smooth_fits(...)` is used to smooth a FITS image to a target angular resolution (beam size).  
+This is useful when you want to compare radio maps with different resolutions or match multiple images to a common beam before plotting or measuring flux.
+
+It reads the input beam from the FITS header (`BMAJ`, `BMIN`, `BPA`), builds the required Gaussian kernel, convolves the image, updates the header to the new beam, and writes the smoothed FITS file.
+
+Example:
+
+```python
+
+header, data = ShowMap.load_fits_image("your.fits")
+
+ShowMap.smooth_fits(
+    hdr=header,
+    data=data,
+    outfile="your_smoothed.fits",
+    target_bmaj=15.0,   # arcsec
+    target_bmin=15.0,   # arcsec
+    target_bpa=0.0,
+    method="fft"
+)
+
+
+In summary, the most commonly used functions are  `ShowMap.load_fits_image`, `ShowMap.project`, `ShowMap.show_fits`, `ShowMap.show_fits_multi`, `ShowMap.show_contour`, `ShowMap.show_beam`, `ShowMap.show_colobar`, `ShowMap.show_tick`, `ShowMap.draw_scalebar`, `ShowMap.draw_arrow`, `ShowMap.cutout_2D`, `ShowMap.carta_log_stretch`, and `ShowMap.smooth_edge`. For more advanced figure production, `ShowMap.show_fits(...)` and `ShowMap.show_fits_multi(...)`, `ShowMap.smooth_fits(...)` provide most of the functionality needed for astronomical plotting.
