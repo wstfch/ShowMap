@@ -360,6 +360,6 @@ ShowMap.smooth_fits(
 )
 ```
 
-In summary, the most commonly used functions are  `ShowMap.load_fits_image`, `ShowMap.project`, `ShowMap.show_fits`, `ShowMap.show_fits_multi`, `ShowMap.show_contour`, `ShowMap.show_beam`, `ShowMap.show_colobar`, `ShowMap.show_tick`, `ShowMap.draw_scalebar`, `ShowMap.draw_arrow`, `ShowMap.cutout_2D`, `ShowMap.carta_log_stretch`, and `ShowMap.smooth_edge`. For more advanced figure production, `ShowMap.show_fits(...)`, `ShowMap.show_fits_multi(...)` and ShowMap.smooth_fits(...) provide most of the functionality needed for astronomical plotting.
+In summary, the most commonly used functions are  `ShowMap.load_fits_image`, `ShowMap.project`, `ShowMap.show_fits`, `ShowMap.show_fits_multi`, `ShowMap.show_contour`, `ShowMap.show_beam`, `ShowMap.show_colobar`, `ShowMap.show_tick`, `ShowMap.draw_scalebar`, `ShowMap.draw_arrow`, `ShowMap.cutout_2D`, `ShowMap.carta_log_stretch`, and `ShowMap.smooth_edge`. For more advanced figure production, `ShowMap.show_fits(...)`, `ShowMap.show_fits_multi(...)` and `ShowMap.smooth_fits(...)` provide most of the functionality needed for astronomical plotting.
 
 
