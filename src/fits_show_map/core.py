@@ -23,7 +23,16 @@ from matplotlib.ticker import ScalarFormatter
 from matplotlib.cm import ScalarMappable
 from matplotlib.colors import Normalize
 from reproject import reproject_interp, reproject_exact
-from scipy.ndimage import generic_filter
+
+#from scipy.ndimage import generic_filter
+try:
+    from scipy.ndimage import generic_filter, gaussian_filter
+    _HAS_SCIPY = True
+except ImportError:
+    from scipy.ndimage import generic_filter
+    gaussian_filter = None
+    _HAS_SCIPY = False
+    
 from copy import deepcopy
 from astropy import units as u
 from astropy.convolution import convolve, Gaussian2DKernel, convolve_fft
@@ -132,7 +141,14 @@ def load_fits_image(filename):
 
 
 def show_map(image,cmap='viridis',savefig='False'):
-    filename = re.findall('(.+)(?=.fits)', image)[0] 
+    path = Path(image)
+    if path.suffix.lower() == ".gz" and path.name.lower().endswith(".fits.gz"):
+        filename = str(path.with_suffix("").with_suffix(""))
+    elif path.suffix.lower() in {".fits", ".fit"}:
+        filename = str(path.with_suffix(""))
+    else:
+        filename = str(path)
+    #filename = re.findall('(.+)(?=.fits)', image)[0] 
     header,data = load_fits_image(image)
     print(header)
     wcs = WCS(header)
@@ -518,8 +534,11 @@ class ShowMap:
             if cont_list[i]:
                 ShowMap.show_contour(ax, cont_data=cont_data_list[i], cont_levels=cont_levels_list[i], cont_color=cont_color_list[i])
 
-            ShowMap.show_tick(ax,set_minor=set_minor,direction=direction,line_color=line_color,line_width=line_width,tick_maj_len=tick_maj_len,\
-            tick_minor_len=tick_minor_len,tick_ra_spac=tick_ra_spac,tick_dec_spac=tick_dec_spac,tick_freq=tick_freq)
+            #ShowMap.show_tick(ax,set_minor=set_minor,direction=direction,line_color=line_color,line_width=line_width,tick_maj_len=tick_maj_len,\
+            #tick_minor_len=tick_minor_len,tick_ra_spac=tick_ra_spac,tick_dec_spac=tick_dec_spac,tick_freq=tick_freq)
+            ShowMap.show_tick(ax,set_minor=set_minor_list[i],direction=direction_list[i],line_color=line_color,line_width=line_width_list[i],\
+                              tick_maj_len=tick_maj_len_list[i],tick_minor_len=tick_minor_len_list[i],tick_ra_spac=tick_ra_spac_list[i],\
+                              tick_dec_spac=tick_dec_spac_list[i],tick_freq=tick_freq_list[i])
 
             # Set Labels and Title
             ax.set_xlabel(x_label_list[i], labelpad=xpad_list[i])
@@ -579,12 +598,12 @@ class ShowMap:
             cbar.set_label(cb_lab, fontsize=cb_font, labelpad=15)  # Set the color bar label
 
     @staticmethod
-    def show_colobar1(pos=[0.98, 0.206, 0.03, 0.67],ticks=None,cb_lab=None,cb_pad=20):
-        # Set the position and scale of colorbar
-        position=fig.add_axes(pos) # [left,down,right,up]
-        cbar = fig.colorbar(im, cax = position)
-        cbar.set_label(cb_lab,labelpad=cb_pad)
+    def show_colobar1(fig, im, pos=[0.98, 0.206, 0.03, 0.67], ticks=None, cb_lab=None, cb_pad=20):
+        position = fig.add_axes(pos)
+        cbar = fig.colorbar(im, cax=position)
+        cbar.set_label(cb_lab, labelpad=cb_pad)
         cbar.set_ticks(ticks)
+        return cbar
 
     # To draw the beam 
     @staticmethod
@@ -838,7 +857,7 @@ class ShowMap:
             out_data = cut.data
             out_wcs = cut.wcs
         else:
-            print('Only support 2D fits image!')
+            raise ValueError("Only support 2D fits image!")
 
         out_hdr = out_wcs.to_header()
         #fits.PrimaryHDU(data=out_data, header=out_hdr).writeto(outfile, overwrite=overwrite)
