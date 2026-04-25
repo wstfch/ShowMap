@@ -336,6 +336,30 @@ masked_data, alpha = ShowMap.smooth_edge(data, sigma_pix=1.0, mask=mask)
 fig, ax = ShowMap.show_fits(header=header, data=masked_data, alpha_lim=alpha)
 ```
 
-In summary, the most commonly used functions are  `ShowMap.load_fits_image`, `ShowMap.project`, `ShowMap.show_fits`, `ShowMap.show_fits_multi`, `ShowMap.show_contour`, `ShowMap.show_beam`, `ShowMap.show_colobar`, `ShowMap.show_tick`, `ShowMap.draw_scalebar`, `ShowMap.draw_arrow`, `ShowMap.cutout_2D`, `ShowMap.carta_log_stretch`, and `ShowMap.smooth_edge`. For more advanced figure production, `ShowMap.show_fits(...)` and `ShowMap.show_fits_multi(...)` provide most of the functionality needed for astronomical plotting.
+### 5. smooth_fits
+
+`ShowMap.smooth_fits(...)` is used to smooth a FITS image to a target angular resolution (beam size). This is especially useful when you want to compare radio maps with different resolutions, or when multiple images need to be matched to a common beam before plotting, flux measurements, or further analysis.
+
+The function reads the input beam information from the FITS header (such as `BMAJ`, `BMIN`, and `BPA`), computes the required Gaussian kernel, performs the convolution, updates the output header to the new beam size, and writes the smoothed FITS image to a new file.
+
+Example:
+
+```python
+from fits_show_map import ShowMap
+
+header, data = ShowMap.load_fits_image("your.fits")
+
+ShowMap.smooth_fits(
+    hdr=header,
+    data=data,
+    outfile="your_smoothed.fits",
+    target_bmaj=15.0,   # arcsec
+    target_bmin=15.0,   # arcsec
+    target_bpa=0.0,     # degrees
+    method="fft"
+)
+```
+
+In summary, the most commonly used functions are  `ShowMap.load_fits_image`, `ShowMap.project`, `ShowMap.show_fits`, `ShowMap.show_fits_multi`, `ShowMap.show_contour`, `ShowMap.show_beam`, `ShowMap.show_colobar`, `ShowMap.show_tick`, `ShowMap.draw_scalebar`, `ShowMap.draw_arrow`, `ShowMap.cutout_2D`, `ShowMap.carta_log_stretch`, and `ShowMap.smooth_edge`. For more advanced figure production, `ShowMap.show_fits(...)`, `ShowMap.show_fits_multi(...)` and ShowMap.smooth_fits(...) provide most of the functionality needed for astronomical plotting.
 
 
